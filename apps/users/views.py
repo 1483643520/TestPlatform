@@ -1,16 +1,11 @@
-from django.shortcuts import render
-
 # Create your views here.
-# Create your views here.
-from rest_framework import viewsets, permissions
-from rest_framework import generics
-
-from django.contrib.auth import models
-from rest_framework.decorators import action
-from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework import viewsets, permissions
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from django.contrib.auth import models
 
-from users import serializers
+from . import serializers
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -34,7 +29,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     删除接口
 
     """
-    
+
     # 定义 queryset 查询集
     queryset = models.User.objects.all()
     # 定义 serializer_class 序列化器类
@@ -52,25 +47,27 @@ class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class Check(GenericAPIView):
-    
-    def get(self, request, pk):
-        """
-        校验用户名及邮箱是否重复s
-        :param request:
-        :param pk:
-        :return:
-        """
-        if "@" in pk:
-            print(pk)
-            emails = models.User.objects.all().filter(email = pk)
-            result = {
-                "count": len(emails)
-            }
-            return Response(data = result)
-        else:
-            emails = models.User.objects.all().filter(username = pk)
-            result = {
-                "count": len(emails)
-            }
-            return Response(data = result)
+class UsernameValidateView(APIView):
+    """
+    校验用户名
+    """
+
+    def get(self, request, username):
+        dict = {
+            "username": username,
+            "count": User.objects.filter(username=username).count()
+        }
+        return Response(dict)
+
+
+class EmailValidateView(APIView):
+    """
+    校验邮箱
+    """
+
+    def get(self, request, email):
+        dict = {
+            "email": email,
+            "count": User.objects.filter(email=email).count()
+        }
+        return Response(dict)

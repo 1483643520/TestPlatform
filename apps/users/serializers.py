@@ -14,9 +14,9 @@ from rest_framework_jwt.utils import api_settings
 
 
 class UsersSerializers(serializers.ModelSerializer):
-    password_confirm = CharField(label = "确认密码", help_text = "确认密码", max_length = 128, write_only = True)
-    token = CharField(label = "token", help_text = "token", max_length = 128, read_only = True)
-    
+    password_confirm = CharField(label="确认密码", help_text="确认密码", max_length=128, write_only=True)
+    token = CharField(label="token", help_text="token", max_length=128, read_only=True)
+
     class Meta:
         model = models.User
         fields = ("id", "username", "email", "password", "password_confirm", "token")
@@ -31,14 +31,14 @@ class UsersSerializers(serializers.ModelSerializer):
                     "min_length": "仅允许输入6-20个字符",
                     "max_length": "仅允许输入6-20个字符",
                 }
-                
+
             },
             "email": {
                 "label": "邮箱",
                 "help_text": "邮箱",
                 "write_only": True,
                 "required": True,
-                "validators": [UniqueValidator(queryset = models.User.objects.all(), message = "此邮箱已被注册")]
+                "validators": [UniqueValidator(queryset=models.User.objects.all(), message="此邮箱已被注册")]
             },
             "password": {
                 "label": "密码",
@@ -52,14 +52,14 @@ class UsersSerializers(serializers.ModelSerializer):
                 }
             },
         }
-    
+
     def validate(self, attrs):
         password_ = attrs["password_confirm"]
         if attrs["password"] != password_:
             raise serializers.ValidationError("密码与确认密码必须一致")
         del attrs["password_confirm"]
         return attrs
-    
+
     def create(self, validated_data):
         # 重置加密密码
         # create_user会对密码进行加密

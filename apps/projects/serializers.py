@@ -15,7 +15,7 @@ class ProjectsModelSerializers(serializers.ModelSerializer):
     """
     定义项目序列化器
     """
-    
+
     class Meta:
         """
         设置元数据属性
@@ -29,8 +29,8 @@ class ProjectsModelSerializers(serializers.ModelSerializer):
                 "read_only": True
             }
         }
-    
+
     def create(self, validate_data):
         project_obj = super().create(validate_data)
-        DebugTalks.objects.create(project = project_obj)
+        DebugTalks.objects.create(project=project_obj)
         return project_obj

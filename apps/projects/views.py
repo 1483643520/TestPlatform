@@ -3,9 +3,10 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from projects import models
-from projects import serializers
+from . import models
+from . import serializers
 from .utils import get_count_by_project
+
 
 class ProjectsViewSet(viewsets.ModelViewSet):
     """
@@ -28,7 +29,7 @@ class ProjectsViewSet(viewsets.ModelViewSet):
     删除接口
 
     """
-    
+
     # 定义 queryset 查询集
     queryset = models.Projects.objects.all()
     # 定义 serializer_class 序列化器类
@@ -43,35 +44,35 @@ class ProjectsViewSet(viewsets.ModelViewSet):
     # 定义排序字段
     ordering_fields = ["id", "name"]
     permission_classes = [permissions.IsAuthenticated]
-    
+
     # 重写list方法
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        
+
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many = True)
+            serializer = self.get_serializer(page, many=True)
             # 对结果进行格式化
             datas = get_count_by_project(serializer.data)
             return self.get_paginated_response(datas)
-        serializer = self.get_serializer(queryset, many = True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    
+
     # 获取项目所有名称
-    @action(methods = ["get"], detail = False)
+    @action(methods=["get"], detail=False)
     def name(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = self.get_serializer(instance = queryset, many = True)
+        serializer = self.get_serializer(instance=queryset, many=True)
         return Response(serializer.data)
-    
+
     # 获取项目接口信息
-    @action(detail = True)
+    @action(detail=True)
     def interfaces(self, request, *args, **kwargs):
         instance = self.get_queryset()
-        serializer = self.get_serializer(instance = instance, many = True)
+        serializer = self.get_serializer(instance=instance, many=True)
         return Response(serializer.data)
-    
+
     # 从写 get_serializer_class 方法
     def get_serializer_class(self):
-        return serializers.ProjectsInterfacesModelSerializers if self.action == "interfaces" \
+        return serializers.ProjectsModelSerializers if self.action == "interfaces" \
             else self.serializer_class
