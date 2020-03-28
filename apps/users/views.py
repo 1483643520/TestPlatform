@@ -44,7 +44,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     # 定义排序字段
     ordering_fields = ["id"]
     # 定义授权类
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
 
 class UsernameValidateView(APIView):

@@ -23,12 +23,12 @@ def get_count_by_project(datas):
     for item in datas:
         create_time = item["create_time"]
         item["create_time"] = create_time.split("T")[0] + " " + create_time.split("T")[1].split(".")[0]
-        
+
         # 获取接口数量
         # 分组关联计数
         project_id = item["id"]
-        interface_testcases_objs = Interfaces.objects.values("id").annotate(testcases = Count("testcases")).filter(
-            project_id = project_id)
+        interface_testcases_objs = Interfaces.objects.values("id").annotate(testcases=Count("testcases")).filter(
+            project_id=project_id)
         # 获取接口数量
         interfaces_count = interface_testcases_objs.count()
         # 获取用例总数
@@ -36,19 +36,19 @@ def get_count_by_project(datas):
         for i in interface_testcases_objs:
             testcases_count += i["testcases"]
         # 获取配置数量
-        interface_configures_objs = Interfaces.objects.values("id").annotate(configures = Count("configures")).filter(
-            project_id = project_id)
+        interface_configures_objs = Interfaces.objects.values("id").annotate(configures=Count("configures")).filter(
+            project_id=project_id)
         configures_count = 0
         for i in interface_configures_objs:
             configures_count += i["configures"]
         # 获取套件总数
-        testsuits_count = Testsuits.objects.filter(project_id = project_id).count()
-        
+        testsuits_count = Testsuits.objects.filter(project_id=project_id).count()
+
         item["interfaces"] = interfaces_count
         item["testsuits"] = testsuits_count
         item["testcases"] = testcases_count
         item["configures"] = configures_count
-        
+
         datas_list.append(item)
-        
+
     return datas_list

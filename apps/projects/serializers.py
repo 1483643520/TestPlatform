@@ -9,6 +9,7 @@ from rest_framework import serializers
 
 from debugtalks.models import DebugTalks
 from . import models
+from interfaces.models import Interfaces
 
 
 class ProjectsModelSerializers(serializers.ModelSerializer):
@@ -32,5 +33,26 @@ class ProjectsModelSerializers(serializers.ModelSerializer):
 
     def create(self, validate_data):
         project_obj = super().create(validate_data)
+        # 对应创建debugTalks数据
         DebugTalks.objects.create(project=project_obj)
         return project_obj
+
+
+class ProjectsNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Projects
+        fields = ("id", "name")
+
+
+class InterfaceNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interfaces
+        fields = ("id", "name")
+
+
+class InterfacesByProjectIdSerializer(serializers.ModelSerializer):
+    interfaces = InterfaceNameSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Projects
+        fields = ("id", "interfaces")

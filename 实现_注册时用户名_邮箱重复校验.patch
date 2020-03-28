@@ -1,0 +1,281 @@
+Index: apps/users/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- apps/users/urls.py	(revision aa97457d4fc7eb39d8b7bca34cce567e7e1a39ab)
++++ apps/users/urls.py	(date 1585300846557)
+@@ -4,21 +4,23 @@
+ # 用户路由信息
+ # author:zhaohexin
+ # time：2020/1/8 11:10 下午
+-from django.urls import path
++from django.urls import path, re_path
+ from rest_framework import routers
+ 
+-from .views import UsersViewSet, Check
++from .views import UsersViewSet, UsernameValidateView, EmailValidateView
+ from rest_framework_jwt.views import obtain_jwt_token
+ 
+ # 创建路由集
+ router = routers.DefaultRouter()
+ # 确定前缀
+-router.register(r"users", UsersViewSet)
++router.register(r"register", UsersViewSet)
+ 
+ urlpatterns = [
+     # 调用jwt默认登录返回token信息
+     path("login/", obtain_jwt_token),
+-    path("users/<pk>/count/", Check.as_view())
++    re_path(r'^(?P<username>\w{6,20})/count/$', UsernameValidateView.as_view(), name="check_username"),
++    re_path(r'^(?P<email>[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z0-9_-]+)/count/$', EmailValidateView.as_view(), name="check_email"),
++
+ ]
+ 
+ # 生成路由信息
+Index: apps/users/serializers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- apps/users/serializers.py	(revision aa97457d4fc7eb39d8b7bca34cce567e7e1a39ab)
++++ apps/users/serializers.py	(date 1585300797766)
+@@ -14,9 +14,9 @@
+ 
+ 
+ class UsersSerializers(serializers.ModelSerializer):
+-    password_confirm = CharField(label = "确认密码", help_text = "确认密码", max_length = 128, write_only = True)
+-    token = CharField(label = "token", help_text = "token", max_length = 128, read_only = True)
+-    
++    password_confirm = CharField(label="确认密码", help_text="确认密码", max_length=128, write_only=True)
++    token = CharField(label="token", help_text="token", max_length=128, read_only=True)
++
+     class Meta:
+         model = models.User
+         fields = ("id", "username", "email", "password", "password_confirm", "token")
+@@ -31,14 +31,14 @@
+                     "min_length": "仅允许输入6-20个字符",
+                     "max_length": "仅允许输入6-20个字符",
+                 }
+-                
++
+             },
+             "email": {
+                 "label": "邮箱",
+                 "help_text": "邮箱",
+                 "write_only": True,
+                 "required": True,
+-                "validators": [UniqueValidator(queryset = models.User.objects.all(), message = "此邮箱已被注册")]
++                "validators": [UniqueValidator(queryset=models.User.objects.all(), message="此邮箱已被注册")]
+             },
+             "password": {
+                 "label": "密码",
+@@ -52,14 +52,14 @@
+                 }
+             },
+         }
+-    
++
+     def validate(self, attrs):
+         password_ = attrs["password_confirm"]
+         if attrs["password"] != password_:
+             raise serializers.ValidationError("密码与确认密码必须一致")
+         del attrs["password_confirm"]
+         return attrs
+-    
++
+     def create(self, validated_data):
+         # 重置加密密码
+         # create_user会对密码进行加密
+Index: apps/projects/serializers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- apps/projects/serializers.py	(revision aa97457d4fc7eb39d8b7bca34cce567e7e1a39ab)
++++ apps/projects/serializers.py	(date 1585303020339)
+@@ -15,7 +15,7 @@
+     """
+     定义项目序列化器
+     """
+-    
++
+     class Meta:
+         """
+         设置元数据属性
+@@ -29,8 +29,8 @@
+                 "read_only": True
+             }
+         }
+-    
++
+     def create(self, validate_data):
+         project_obj = super().create(validate_data)
+-        DebugTalks.objects.create(project = project_obj)
++        DebugTalks.objects.create(project=project_obj)
+         return project_obj
+Index: apps/projects/views.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- apps/projects/views.py	(revision aa97457d4fc7eb39d8b7bca34cce567e7e1a39ab)
++++ apps/projects/views.py	(date 1585294816458)
+@@ -3,10 +3,11 @@
+ from rest_framework.decorators import action
+ from rest_framework.response import Response
+ 
+-from projects import models
+-from projects import serializers
++from . import models
++from . import serializers
+ from .utils import get_count_by_project
+ 
++
+ class ProjectsViewSet(viewsets.ModelViewSet):
+     """
+     create:
+@@ -28,7 +29,7 @@
+     删除接口
+ 
+     """
+-    
++
+     # 定义 queryset 查询集
+     queryset = models.Projects.objects.all()
+     # 定义 serializer_class 序列化器类
+@@ -43,35 +44,35 @@
+     # 定义排序字段
+     ordering_fields = ["id", "name"]
+     permission_classes = [permissions.IsAuthenticated]
+-    
++
+     # 重写list方法
+     def list(self, request, *args, **kwargs):
+         queryset = self.filter_queryset(self.get_queryset())
+-        
++
+         page = self.paginate_queryset(queryset)
+         if page is not None:
+-            serializer = self.get_serializer(page, many = True)
++            serializer = self.get_serializer(page, many=True)
+             # 对结果进行格式化
+             datas = get_count_by_project(serializer.data)
+             return self.get_paginated_response(datas)
+-        serializer = self.get_serializer(queryset, many = True)
++        serializer = self.get_serializer(queryset, many=True)
+         return Response(serializer.data)
+-    
++
+     # 获取项目所有名称
+-    @action(methods = ["get"], detail = False)
++    @action(methods=["get"], detail=False)
+     def name(self, request, *args, **kwargs):
+         queryset = self.get_queryset()
+-        serializer = self.get_serializer(instance = queryset, many = True)
++        serializer = self.get_serializer(instance=queryset, many=True)
+         return Response(serializer.data)
+-    
++
+     # 获取项目接口信息
+-    @action(detail = True)
++    @action(detail=True)
+     def interfaces(self, request, *args, **kwargs):
+         instance = self.get_queryset()
+-        serializer = self.get_serializer(instance = instance, many = True)
++        serializer = self.get_serializer(instance=instance, many=True)
+         return Response(serializer.data)
+-    
++
+     # 从写 get_serializer_class 方法
+     def get_serializer_class(self):
+-        return serializers.ProjectsInterfacesModelSerializers if self.action == "interfaces" \
++        return serializers.ProjectsModelSerializers if self.action == "interfaces" \
+             else self.serializer_class
+Index: apps/users/views.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- apps/users/views.py	(revision aa97457d4fc7eb39d8b7bca34cce567e7e1a39ab)
++++ apps/users/views.py	(date 1585300518813)
+@@ -1,16 +1,11 @@
+-from django.shortcuts import render
+-
+-# Create your views here.
+ # Create your views here.
++from rest_framework.response import Response
+ from rest_framework import viewsets, permissions
+-from rest_framework import generics
+-
++from rest_framework.views import APIView
++from django.contrib.auth.models import User
+ from django.contrib.auth import models
+-from rest_framework.decorators import action
+-from rest_framework.generics import GenericAPIView
+-from rest_framework.response import Response
+ 
+-from users import serializers
++from . import serializers
+ 
+ 
+ class UsersViewSet(viewsets.ModelViewSet):
+@@ -34,7 +29,7 @@
+     删除接口
+ 
+     """
+-    
++
+     # 定义 queryset 查询集
+     queryset = models.User.objects.all()
+     # 定义 serializer_class 序列化器类
+@@ -52,25 +47,27 @@
+     permission_classes = [permissions.IsAuthenticated]
+ 
+ 
+-class Check(GenericAPIView):
+-    
+-    def get(self, request, pk):
+-        """
+-        校验用户名及邮箱是否重复s
+-        :param request:
+-        :param pk:
+-        :return:
+-        """
+-        if "@" in pk:
+-            print(pk)
+-            emails = models.User.objects.all().filter(email = pk)
+-            result = {
+-                "count": len(emails)
+-            }
+-            return Response(data = result)
+-        else:
+-            emails = models.User.objects.all().filter(username = pk)
+-            result = {
+-                "count": len(emails)
+-            }
+-            return Response(data = result)
++class UsernameValidateView(APIView):
++    """
++    校验用户名
++    """
++
++    def get(self, request, username):
++        dict = {
++            "username": username,
++            "count": User.objects.filter(username=username).count()
++        }
++        return Response(dict)
++
++
++class EmailValidateView(APIView):
++    """
++    校验邮箱
++    """
++
++    def get(self, request, email):
++        dict = {
++            "email": email,
++            "count": User.objects.filter(email=email).count()
++        }
++        return Response(dict)
