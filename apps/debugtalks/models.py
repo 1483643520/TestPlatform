@@ -5,7 +5,7 @@ from utils.base_model import BaseModel
 # Create your models here.
 
 
-class DebugTalks(BaseModel):
+class DebugTalksModel(BaseModel):
     """
     内置函数模型类
     """

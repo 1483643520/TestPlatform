@@ -12,7 +12,7 @@ router = routers.SimpleRouter()
 # 第二个参数为视图集类(只有视图集类才能支持router)
 # 第三个参数为basename, 指定url别名前缀
 # router.register(r"projects", views.ProjectViewSet, basename="bs")
-router.register(r"projects", views.ProjectsViewSet)
+router.register(r"testsuits", views.TestsuitsViewSet)
 
 # 子路由(子应用下创建的路由表)
 urlpatterns = [

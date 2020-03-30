@@ -7,14 +7,15 @@
 
 
 from django.urls import path
+from django.urls import path
 from rest_framework import routers
 
-from .views import InterfacesViewSet
+from .views import EnvsViewSet
 
 # 创建路由集
 router = routers.SimpleRouter()
 # 确定前缀
-router.register(r"interfaces", InterfacesViewSet)
+router.register(r"envs", EnvsViewSet)
 
 urlpatterns = [
 ]

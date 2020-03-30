@@ -155,10 +155,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.backends.DjangoFilterBackend",
-                                "rest_framework.filters.OrderingFilter"],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter'
+    ],
     "DEFAULT_PAGINATION_CLASS": "utils.pagination.ManualPageNumberPagination",
     "PAGE_SIZE": 2,
+    # 指定用于支持coreapi的Schema
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 指定JWT Token认证
@@ -261,3 +264,5 @@ LOGGING = {
         },
     }
 }
+
+REPORTS_DIR = os.path.join(BASE_DIR, 'reports')

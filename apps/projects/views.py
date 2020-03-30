@@ -41,9 +41,9 @@ class ProjectsViewSet(viewsets.ModelViewSet):
     pagination_class = [PageNumberPagination]
     """
     # 定义筛选字段
-    filterset_fields = ["id", "name"]
+    filterset_fields = ["id", "name", "leader", "tester"]
     # 定义排序字段
-    ordering_fields = ["id", "name"]
+    ordering_fields = ['id', 'name', 'leader']
     permission_classes = [permissions.IsAuthenticated]
 
     # 重写list方法
