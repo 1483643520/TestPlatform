@@ -259,10 +259,15 @@ LOGGING = {
         # log 调用时需要当作参数传入
         'log': {
             'handlers': ['error', 'info', 'console', 'default'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True
         },
     }
 }
 
+# 报告下载路径
 REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
+
+# 用例ymal整合后存放路径
+# noinspection PyUnresolvedReferences
+TESTCASE = os.path.join(BASE_DIR, "testcase")

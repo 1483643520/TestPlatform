@@ -24,6 +24,8 @@ urlpatterns = [
     path("", include("debugtalks.urls")),
     path("", include("testsuits.urls")),
     path("", include("reports.urls")),
+    path("", include("testcase.urls")),
+    path("", include("configures.urls")),
     path("docs/", include_docs_urls(title="接口信息文档")),
     path("api/", include("rest_framework.urls")),
 ]

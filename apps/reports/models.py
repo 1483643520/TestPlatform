@@ -11,6 +11,9 @@ class ReportsModel(BaseModel):
     """
     id = models.AutoField(verbose_name="主键", primary_key=True, help_text="id主键")
     name = models.CharField(verbose_name="报告名称", max_length=200, unique=True, help_text="报告名称")
+    case_list = models.CharField(verbose_name="用例查询列表", max_length=200, help_text="用例查询列表", default=[])
+    result_list = models.CharField(verbose_name="用例结果查询列表", max_length=200, help_text="用例结果查询列表", default=[])
+    case_details = models.TextField(verbose_name="用例展示列表", help_text="用例展示列表", default=[])
     result = models.BooleanField(verbose_name="执行结果", default=1, help_text="执行结果")  # 1为成功，0为失败
     count = models.IntegerField(verbose_name="用例总数", help_text="用例总数")
     success = models.IntegerField(verbose_name="成功总数", help_text="成功总数")
