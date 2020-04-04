@@ -128,7 +128,6 @@ class TestcasesViewSet(ModelViewSet):
         }
         return Response(datas)
 
-    # TODO:需要run方法执行用例
     @action(methods=["POST"], detail=True)
     def run(self, request, *args, **kwargs):
         # 1、获取模型类对象

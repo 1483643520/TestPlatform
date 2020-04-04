@@ -188,29 +188,6 @@ def create_report(summary, report_name):
     """
     # 定义报告名称并生成报告且获取报告内容
     report_path = report.gen_html_report(summary, report_template=r"stucit/template_new.html")
-    # 处理html文件中case中数据
-    testResult = []
-    for record in summary["details"][0]["records"]:
-        case = {
-            "className": f'{record.get("name")}',
-            "spendTime": f'{record.get("meta_datas").get("stat").get("elapsed_ms")}',
-            "status": f'{record.get("status")}',
-            "log": {
-                "url": f'{record.get("meta_datas").get("data")[0].get("request").get("url")}',
-                "method": f'{record.get("meta_datas").get("data")[0].get("request").get("method")}',
-                "status_code": f'{record.get("meta_datas").get("data")[0].get("response").get("status_code")}',
-                "request_headers": f'{record.get("meta_datas").get("data")[0].get("request").get("headers")}',
-                "request_body": f'{record.get("meta_datas").get("data")[0].get("request").get("body")}',
-                "response_headers": f'{record.get("meta_datas").get("data")[0].get("response").get("headers")}',
-                "response_body": f'{record.get("meta_datas").get("data")[0].get("response").get("body")}',
-                "conernt_type": f'{record.get("meta_datas").get("data")[0].get("response").get("content_type")}',
-                "error": f'{record.get("attachment")}',
-            }
-        }
-        testResult.append(case)
-    with open(report_path, encoding='utf-8') as stream:
-        reports = stream.read().replace(summary["details"][0]["name"], f'"{summary["details"][0]["name"]}"').replace("用例详情", f"{testResult}")
-    os.remove(report_path)
 
     # 继续格式化summary
     summary['time']['start_at'] = datetime. \
@@ -218,9 +195,11 @@ def create_report(summary, report_name):
     summary['time']['duration'] = round(summary['time']['duration'], 2)
     for detail in summary['details']:
         detail['time']['duration'] = round(detail['time']['duration'], 2)
+    # 处理前端所需数据
     case_list = []
     result_list = []
     case_details = []
+    hasbeen = []
     i = 1
     for detail in summary.get("details"):
         if detail.get("records"):
@@ -232,12 +211,52 @@ def create_report(summary, report_name):
                     name = "失败"
                 else:
                     name = "跳过"
-                result = {"value": record.get("status"), "name": name}
                 case_detail = {"result": record.get("status"), "case": i, "record": json.dumps(record)}
                 i += 1
                 case_list.append(case)
-                result_list.append(result)
                 case_details.append(case_detail)
+                # 判断是否已经存在
+                if not record.get("status") in hasbeen:
+                    result = {"value": record.get("status"), "name": name}
+                    result_list.append(result)
+                hasbeen.append(record.get("status"))
+    # 处理html文件中case中数据
+    report_name_replacement = f'"{report_name}"'
+    testResult = []
+    for detail in summary["details"]:
+        for record in detail["records"]:
+            case = {
+                "className": f'{record.get("name")}',
+                "spendTime": f'{record.get("meta_datas").get("stat").get("elapsed_ms")}',
+                "status": f'{record.get("status")}',
+                "log": {
+                    "url": f'{record.get("meta_datas").get("data")[0].get("request").get("url")}',
+                    "method": f'{record.get("meta_datas").get("data")[0].get("request").get("method")}',
+                    "status_code": f'{record.get("meta_datas").get("data")[0].get("response").get("status_code")}',
+                    "request_headers": f'{record.get("meta_datas").get("data")[0].get("request").get("headers")}',
+                    "request_body": f'{record.get("meta_datas").get("data")[0].get("request").get("body")}',
+                    "response_headers": f'{record.get("meta_datas").get("data")[0].get("response").get("headers")}',
+                    "response_body": f'{record.get("meta_datas").get("data")[0].get("response").get("body")}',
+                    "conernt_type": f'{record.get("meta_datas").get("data")[0].get("response").get("content_type")}',
+                    "error": f'{record.get("attachment")}',
+                }
+            }
+            testResult.append(case)
+    resulData_replacement = {
+        "testPass": summary.get("stat").get("teststeps").get("successes"),
+        "testAll": summary.get("stat").get("teststeps").get("total"),
+        "testFail": summary.get("stat").get("teststeps").get("errors"),
+        "testSkip": summary.get("stat").get("teststeps").get("skipped"),
+        "beginTime": summary.get("time").get("start_at"),
+        "totalTime": summary.get("time").get("duration"),
+        "testName": f'"{report_name}"',
+        "testResult": testResult
+
+    }
+    with open(report_path, encoding='utf-8') as stream:
+        reports = stream.read().replace("report_name_replacement", report_name_replacement).replace(
+            "resulData_replacement", json.dumps(resulData_replacement))
+    os.remove(report_path)
 
     test_report = {
         'name': report_name + "_" + datetime.strftime(datetime.now(), '%Y%m%d%H%M%S'),

@@ -99,4 +99,4 @@ class TestcaseRunSerializers(serializers.ModelSerializer):
         if EnvsModel.objects.filter(id=attrs.get("env_id")).exists():
             return attrs
         else:
-            raise serializers.ValidationError("所选接口不存在！")
+            raise serializers.ValidationError("所选环境不存在！")

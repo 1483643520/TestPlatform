@@ -8,6 +8,7 @@
 from rest_framework import serializers
 
 from debugtalks.models import DebugTalksModel
+from envs.models import EnvsModel
 from . import models
 from interfaces.models import Interfaces
 
@@ -56,3 +57,28 @@ class InterfacesByProjectIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Projects
         fields = ("id", "interfaces")
+
+
+# 定义全局环境变量序列化校验器
+class ProjectRunSerializers(serializers.ModelSerializer):
+    """
+    定义全局环境变量序列化校验器
+    """
+    env_id = serializers.IntegerField(write_only=True, label="全局变量ID", help_text="全局变量ID")
+
+    class Meta:
+        model = models.Projects
+        fields = ("id", "env_id")
+
+    def validate(self, attrs):
+        """
+        校验 env_id是否存在
+        :param attrs: 传入参数attrs
+        :return:传出参数attrs
+        """
+        # 判断env_id是否存在
+        if EnvsModel.objects.filter(id=attrs.get("env_id")).exists():
+            return attrs
+        else:
+            raise serializers.ValidationError("所选接口不存在！")
+
