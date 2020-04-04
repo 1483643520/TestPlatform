@@ -89,7 +89,7 @@ def generate_config(config_id, env_id, file_name):
         # 获取 base_url
     base_url = EnvsModel.objects.get(id=env_id).base_url
     # 组装 config 信息
-    config["config"]["request"]["base_url"] = base_url
+    config["config"]["base_url"] = base_url
     config["config"]["name"] = file_name
     return config["config"]
 
