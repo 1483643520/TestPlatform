@@ -16,7 +16,9 @@ class ReportsModel(BaseModel):
     case_details = models.TextField(verbose_name="用例展示列表", help_text="用例展示列表", default=[])
     result = models.BooleanField(verbose_name="执行结果", default=1, help_text="执行结果")  # 1为成功，0为失败
     count = models.IntegerField(verbose_name="用例总数", help_text="用例总数")
-    success = models.IntegerField(verbose_name="成功总数", help_text="成功总数")
+    success = models.IntegerField(verbose_name="成功总数", help_text="成功总数", default=0)
+    filed = models.IntegerField(verbose_name="失败总数", help_text="失败总数", default=0)
+    skip = models.IntegerField(verbose_name="跳过总数", help_text="跳过总数", default=0)
     html = models.TextField(verbose_name="报告HTML源码", help_text="报告HTML源码", null=True, blank=True, default="")
     summary = models.TextField(verbose_name="报告详情", help_text="报告详情", null=True, blank=True, default="")
 

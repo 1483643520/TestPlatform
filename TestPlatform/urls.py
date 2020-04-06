@@ -26,6 +26,8 @@ urlpatterns = [
     path("", include("reports.urls")),
     path("", include("testcase.urls")),
     path("", include("configures.urls")),
+    path("", include("backlog.urls")),
+    path("", include("summary.urls")),
     path("docs/", include_docs_urls(title="接口信息文档")),
     path("api/", include("rest_framework.urls")),
 ]

@@ -54,7 +54,9 @@ INSTALLED_APPS = [
     "apps.interfaces.apps.InterfacesConfig",
     "apps.projects.apps.ProjectsConfig",
     "apps.reports.apps.ReportsConfig",
-    "apps.testsuits.apps.TestsuitsConfig"
+    "apps.testsuits.apps.TestsuitsConfig",
+    "apps.backlog.apps.BacklogConfig",
+    "apps.summary.apps.SummaryConfig"
 ]
 
 MIDDLEWARE = [

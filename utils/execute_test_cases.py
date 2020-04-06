@@ -262,6 +262,8 @@ def create_report(summary, report_name):
         'name': report_name + "_" + datetime.strftime(datetime.now(), '%Y%m%d%H%M%S'),
         'result': summary.get('success'),
         'success': summary.get('stat').get('teststeps').get("successes"),
+        'filed': summary.get('stat').get('teststeps').get("errors"),
+        'skip': summary.get('stat').get('teststeps').get("skipped"),
         'count': summary.get('stat').get('teststeps').get("total"),
         'html': reports,
         'summary': json.dumps(summary),
