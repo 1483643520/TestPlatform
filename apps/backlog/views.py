@@ -8,8 +8,9 @@ from . import utils
 from .models import BacklogModel
 from .serializers import BacklogSerializers
 
-
 # Create your views here.
+from .utils import format_time_by_backlog
+
 
 class BacklogViewSet(ModelViewSet):
     """
@@ -38,13 +39,16 @@ class BacklogViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     # 筛选/排序
     filter_fields = ["id", "update_time", "user_id"]
-    ordering_fields = ["id", "update_time", "user_id"]
+    ordering_fields = ["update_time"]
 
     # 重写list方法，将时间进行转换
     def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        response.data["results"] = utils.format_time_by_envs(response.data["results"])
-        return response
+        queryset = self.filter_queryset(self.get_queryset().order_by("status")).order_by("create_time")
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        datas = self.get_paginated_response(serializer.data)
+        datas.data["results"] = format_time_by_backlog(datas.data["results"])
+        return datas
 
     def create(self, request, *args, **kwargs):
         obj = super().create(request, *args, **kwargs)

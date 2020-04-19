@@ -10,7 +10,7 @@ from testcase.models import Testcases
 from configures.models import Configures
 
 
-def format_time_by_envs(datas):
+def format_time_by_backlog(datas):
     """
     1、对时间进行格式化
     :param datas:
